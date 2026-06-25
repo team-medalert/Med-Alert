@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Med-Alert - Smart Personal Healthcare Management</title>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.1.18/dist/lenis.css">
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-storage-compat.js"></script>
+
+  <!-- Initialize Firebase -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBmUXPB8UVVnZYEWE5YasVSEe8WvW9VGIA",
+      authDomain: "med-alert-551k.firebaseapp.com",
+      projectId: "med-alert-551k",
+      storageBucket: "med-alert-551k.firebasestorage.app",
+      messagingSenderId: "312463196004",
+      appId: "1:312463196004:web:36a6f5346d77eb36238471",
+      measurementId: "G-YVD8NXCF4X"
+    };
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+
+  <!-- GSAP & Lenis CDNs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+
+  <style>
+    /* Landing-specific styles to keep style.css clean */
+    .landing-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 50px;
+      z-index: 1000;
+      background: rgba(248, 250, 252, 0.4);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    body.dark-theme .landing-nav {
+      background: rgba(9, 13, 22, 0.4);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 50px 80px;
+      position: relative;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      z-index: 10;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 16px;
+      background: rgba(79, 70, 229, 0.08);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.85rem;
+      border-radius: 30px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title span {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .hero-cta {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .features-section {
+      padding: 100px 50px;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+    }
+
+    .feature-card {
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      background: var(--accent-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+    }
+
+    .feature-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .landing-nav {
+        padding: 0 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Standalone Mobile Hamburger Menu Toggle Button -->
+  <button id="menu-toggle-btn" class="btn-circle" aria-label="Toggle menu">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+
+  <!-- Decorative Blobs -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2" style="top: 400px; right: -100px;"></div>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar collapsed">
+      <div class="sidebar-logo">Med-Alert</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a class="sidebar-link" data-tab="dashboard" href="dashboard.html?tab=dashboard">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+            </svg>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" data-tab="medicines" href="dashboard.html?tab=medicines">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+            </svg>
+            <span>Medicines</span>
+          </a>
+        </li>
+        <li class="sidebar-item" id="sidebarPeriodItem" style="display: none;">
+          <a class="sidebar-link" data-tab="period" href="dashboard.html?tab=period">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span>Period Tracker</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" data-tab="reports" href="dashboard.html?tab=reports">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>Medical Reports</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" data-tab="appointments" href="dashboard.html?tab=appointments">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>Appointments</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" data-tab="settings" href="dashboard.html?tab=settings">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Account Settings</span>
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-user">
+        <img id="sidebarUserPhoto" class="sidebar-avatar" src="https://via.placeholder.com/150?text=Avatar"
+          alt="User Avatar">
+        <div class="sidebar-user-info">
+          <div id="sidebarUserName" class="sidebar-user-name">User Name</div>
+          <div class="sidebar-user-role">Med-Alert Patient</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- Navigation Bar -->
+      <nav class="landing-nav">
+        <div class="nav-logo">Med-Alert</div>
+        <div class="nav-buttons">
+      <!-- Dark mode button -->
+      <button class="btn-circle" id="themeToggleBtn" aria-label="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" />
+        </svg>
+      </button>
+      <a href="login.html" class="btn btn-secondary">Log In</a>
+      <a href="register.html" class="btn btn-primary">Sign Up</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero-section">
+    <div class="hero-content">
+      <div class="hero-badge">Smart Health Companion</div>
+      <h1 class="hero-title">Your Health, Guided by <span>Med-Alert</span></h1>
+      <p class="hero-desc">
+        Never miss another medication. Med-Alert helps you schedule medicine reminders, monitor stock levels, predict
+        your cycle, and maintain key emergency contacts—all inside a modern, private, and secure layout.
+      </p>
+      <div class="hero-cta">
+        <a href="register.html" class="btn btn-primary" style="font-size: 1.05rem; padding: 14px 32px;">Get Started
+          Free</a>
+        <a href="#features" class="btn btn-secondary" style="font-size: 1.05rem; padding: 14px 32px;">Explore
+          Features</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="section-header">
+      <h2 class="section-title">Everything You Need to Stay Well</h2>
+      <p class="section-subtitle">Manage all aspects of your wellness and family emergencies with clean, dedicated
+        tools.</p>
+    </div>
+
+    <div class="features-grid">
+      <!-- Feature 1 -->
+      <div class="glass-panel feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+        </div>
+        <h3>Medicine Reminders</h3>
+        <p>Log your daily pills, schedule frequencies, track status, and get alerts before inventory drops low or
+          bottles expire.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="glass-panel feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </div>
+        <h3>Period Tracker</h3>
+        <p>A smart prediction tracker designed for women. Monitor logs, predict upcoming periods, and track ovulation
+          cycle symptoms.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="glass-panel feature-card">
+        <div class="feature-icon">
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3>Emergency Assistance</h3>
+        <p>Securely store primary contact details, relationships, and call buttons for fast reach when minutes matter.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Us Footer -->
+  <footer class="footer-contact">
+    <p>Need support? Contact us at <strong>team.medalert@gmail.com</strong></p>
+    <p style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">&copy; 2026 Team Med-Alert. All rights
+      reserved.</p>
+  </footer>
+
+  </main>
+  </div>
+
+  <script>
+    // Theme Toggle Initialization
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const isDark = localStorage.getItem('dark-theme') === 'true';
+    if (isDark) {
+      document.body.classList.add('dark-theme');
+      updateThemeIcon(true);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDarkActive = document.body.classList.toggle('dark-theme');
+      localStorage.setItem('dark-theme', isDarkActive);
+      updateThemeIcon(isDarkActive);
+    });
+
+    function updateThemeIcon(dark) {
+      themeToggleBtn.innerHTML = dark
+        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707m2.828 9.9a5 5 0 117.072-7.072 5 5 0 01-7.072 7.072z" /></svg>` // sun
+        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`; // moon
+    }
+
+    // Lenis Smooth Scroll Global Init
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // GSAP ScrollTrigger Animations
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Hero Entry Animation
+    gsap.from(".hero-badge", { opacity: 0, y: -20, duration: 0.8, delay: 0.2, ease: "power3.out" });
+    gsap.from(".hero-title", { opacity: 0, y: 30, duration: 1, delay: 0.4, ease: "power3.out" });
+    gsap.from(".hero-desc", { opacity: 0, y: 30, duration: 1, delay: 0.6, ease: "power3.out" });
+    gsap.from(".hero-cta", { opacity: 0, y: 30, duration: 1, delay: 0.8, ease: "power3.out" });
+
+    // Feature Cards Scroll Animation
+    gsap.from(".feature-card", {
+      scrollTrigger: {
+        trigger: ".features-section",
+        start: "top 80%",
+        toggleActions: "play none none none"
+      },
+      opacity: 0,
+      y: 50,
+      stagger: 0.2,
+      duration: 0.8,
+      ease: "power2.out"
+    });
+
+    // Firebase Auth redirect checking
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check auth state once SDK loads
+      const checkAuth = setInterval(() => {
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+          clearInterval(checkAuth);
+          firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+              // User logged in, check if profile exists
+              firebase.firestore().collection('users').doc(user.uid).collection('profile').doc('details').get()
+                .then(doc => {
+                  console.log("Checking path for UID:", user.uid, "Exists:", doc.exists);
+                  if (doc.exists) {
+                    window.location.href = 'dashboard.html';
+                  } else {
+                    window.location.href = 'profile-setup.html';
+                  }
+                })
+                .catch((err) => {
+                  console.error("Error checking profile:", err);
+                  // Fallback in case of permissions error before rules apply
+                  window.location.href = 'profile-setup.html';
+                });
+            }
+          });
+        }
+      }, 200);
+    });
+  </script>
+  <script src="sidebar.js"></script>
+</body>
+
+</html>
