@@ -107,18 +107,20 @@ async function loadUserProfile() {
         };
       }
 
-      // Conditional visibility for Period Tracker: Women/Female only
-      const isFemale = userProfile.gender && (userProfile.gender.toLowerCase() === 'female' || userProfile.gender.toLowerCase() === 'women');
+      // Conditional visibility for Period Tracker based on gender
+      const rawGender = userProfile.gender || '';
+      const verifiedGender = rawGender.trim().toLowerCase();
+      
       const sidebarPeriodItem = document.getElementById('sidebarPeriodItem');
-      const bentoPeriodCard = document.getElementById('bentoPeriodCard');
+      const dashboardPeriodCard = document.getElementById('dashboard-period-card');
 
-      if (isFemale) {
-        sidebarPeriodItem.style.display = 'block';
-        bentoPeriodCard.style.display = 'flex';
+      if (verifiedGender === 'female') {
+        if (sidebarPeriodItem) sidebarPeriodItem.style.display = 'block';
+        if (dashboardPeriodCard) dashboardPeriodCard.style.display = 'block';
         loadPeriodData();
       } else {
-        sidebarPeriodItem.style.display = 'none';
-        bentoPeriodCard.style.display = 'none';
+        if (sidebarPeriodItem) sidebarPeriodItem.style.display = 'none';
+        if (dashboardPeriodCard) dashboardPeriodCard.style.display = 'none';
       }
 
       // Fill settings form
@@ -825,27 +827,36 @@ function populateMedicinesGrid() {
 document.getElementById('medicineSearchInput').addEventListener('input', populateMedicinesGrid);
 document.getElementById('medicineFilterType').addEventListener('change', populateMedicinesGrid);
 
-// Intercept Enter key press on search input to search the reference dictionary
-document.getElementById('medicineSearchInput').addEventListener('keydown', (e) => {
+// Extract the search/lookup execution function
+function triggerMedicineSearch() {
+  const query = document.getElementById('medicineSearchInput').value.trim();
+  if (query) {
+    searchMedicineDictionary(query);
+  }
+}
+
+// Bind search input 'keypress' event (for PC Enter triggers)
+document.getElementById('medicineSearchInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
-    const query = e.target.value.trim();
-    if (query) {
-      searchMedicineDictionary(query);
-    }
+    triggerMedicineSearch();
   }
 });
 
-// Bind click on search icon SVG to search the reference dictionary
+// Bind search button click/tap event (for mobile screen inputs)
+const medicineSearchBtn = document.getElementById('medicineSearchBtn');
+if (medicineSearchBtn) {
+  medicineSearchBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerMedicineSearch();
+  });
+}
+
+// Bind click on search icon SVG to search the reference dictionary (for compatibility)
 const searchIcon = document.querySelector('.search-input-container svg');
 if (searchIcon) {
   searchIcon.style.cursor = 'pointer';
-  searchIcon.addEventListener('click', () => {
-    const query = document.getElementById('medicineSearchInput').value.trim();
-    if (query) {
-      searchMedicineDictionary(query);
-    }
-  });
+  searchIcon.addEventListener('click', triggerMedicineSearch);
 }
 
 // Search Medicine Reference Dictionary
